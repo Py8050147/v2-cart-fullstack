@@ -1,0 +1,12 @@
+# note the file structure 
+# connect database in server
+# make a models => compleate 
+#user.models(
+    password ko check karwan hai ismodified hai modiefied karwana hai nahi to bcypt karwana hai
+    first of all jwt se refresh token and refresh token generate karrwana hai and 
+)
+# make a utils file handle apiError, apiResponse, asyncHandler
+# make a controller
+# make a midlleware in user
+# make routes
+//-r dotenv/config --experimental-json-modules
