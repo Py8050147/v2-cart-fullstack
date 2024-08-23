@@ -33,12 +33,12 @@ const registersUser = asyncHandler(async (req, res) => {
   // check for user creation
   // return res
     
-  const { username, fullname, email, password } = req.body
-  console.log(fullname, username, email, password)
+  const { username, fullname, email, password, phone, address, role } = req.body
+  console.log(fullname, username, email, password, phone, address, role)
   console.log(req.body)
   
   if (
-    [fullname, username, email, password].some((field) => field?.trim() === "")
+    [fullname, username, email, password, phone, address].some((field) => field?.trim() === "")
   ) {
     throw new ApiError(400, "All field are required")
   }
@@ -56,7 +56,10 @@ const registersUser = asyncHandler(async (req, res) => {
     username: username.toLowerCase(),
     email,
     password ,
-    fullname
+    fullname,
+    phone,
+    address,
+    role: role || 'USER'
   })
   // const user = new User({
   //   username,
@@ -215,9 +218,62 @@ const generateNewRefreshToken = asyncHandler(async (req, res) => {
   }
 })
 
+const changeCurrentUser = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body
+  
+  const user = await User.findById(req.user?._id)
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, 'old password incorrect')
+  }
+
+  user.password = newPassword
+  await user.save({ validateBeforeSave: false })
+  
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password changed Successfully"));
+})
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+  .json(new ApiResponse(200, req.user, "Current user fetched successfully"))
+})
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  const { fullname, email, phone, address } = req.body
+  
+  if (!fullname || !email || !phone || !address) {
+    throw new ApiError(400, 'All fields are required')
+  }
+
+  const updateDetails = await User.findByIdAndUpdate(
+     req.user?._id,
+    {
+      $set: {
+        fullname,
+        email,
+        phone,
+        address
+      }
+    },
+    {
+      new: true
+    }
+  )
+
+  return res.status(200).json(new ApiResponse(200, updateDetails, 'Update Account details successfully'))
+})
+
+
 export {
   registersUser,
   loginedUser,
   logoutUser,
-  generateNewRefreshToken
+  generateNewRefreshToken,
+  changeCurrentUser,
+  getCurrentUser,
+  updateAccountDetails
 }
