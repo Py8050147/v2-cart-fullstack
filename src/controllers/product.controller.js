@@ -1,7 +1,7 @@
-import { ApiError } from "../utils/apiError";
-import { ApiResponse } from "../utils/apiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
-import { Product } from "../models/product.model";
+import { ApiError } from "../utils/apiError.js";
+import { ApiResponse } from "../utils/apiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { Product } from "../models/product.model.js";
 import { isValidObjectId } from "mongoose";
 
 const createProduct = asyncHandler(async (req, res) => {
@@ -113,14 +113,19 @@ const upadateProduct = asyncHandler(async (req, res) => {
 
 })  
 
-// const deleteProduct = (asyncHandler(req, res) => {
+const deleteProduct = asyncHandler(async(req, res) => {
+  const { productId } = req.params
 
-// })
+  const product = await Product.findByIdAndDelete(productId)
+
+     return res.status(200).json(new ApiResponse(200, product, 'product delete successfully'))
+})
 export {
     createProduct,
     getAllProduct,
     getProduct,
-    upadateProduct
+  upadateProduct,
+    deleteProduct
 };
     
 // const products = await Product.find()

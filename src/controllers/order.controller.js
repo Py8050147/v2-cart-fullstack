@@ -1,10 +1,10 @@
-import { ApiError } from "../utils/apiError";
-import { ApiResponse } from "../utils/apiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
-import { Order } from "../models/order.model";
+import { ApiError } from "../utils/apiError.js";
+import { ApiResponse } from "../utils/apiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { Order } from "../models/order.model.js";
 // import { isValidObjectId } from "mongoose";
-import { Product } from '../models/product.model'
-import { User } from '../models/user.model'
+import { Product } from '../models/product.model.js'
+// import { User } from '../models/user.model'
 
 // createOrder
 // getOrders
@@ -74,7 +74,6 @@ const updataOrderStatus = asyncHandler(async (req, res) => {
     );
     
     return res.status(200).json(new ApiResponse(200, order, 'updataOrderStatus successfull'))
-  
 
 })
 
