@@ -17,10 +17,10 @@ const productSchema = new Schema(
             type: Number,
             default: 0
           },
-          stock: {
-            default: 0,
-            type: Number
-          },
+          // stock: {
+          //   default: 0,
+          //   type: Number
+          // },
           category: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Category',

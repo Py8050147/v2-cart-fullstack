@@ -23,7 +23,8 @@ const orderSchema = new Schema(
     },
     orderItems: [orderItemSchema],
     address: { // here fill the address in address Model
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Address',
       required: true,
     },
     status: {

@@ -1,14 +1,15 @@
-import { ApiResponse } from "../utils/apiResponse";
-import { ApiError } from "../utils/apiError";
-import { asyncHandler } from "../utils/asyncHandler";
-import { Address } from "../models/address.model";
+import { ApiResponse } from "../utils/apiResponse.js";
+import { ApiError } from "../utils/apiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { Address } from "../models/address.model.js";
 
 // createAddress
 const createAddress = asyncHandler(async (req, res) => {
   const { street, city, state, postalCode, phone, user } = req.body;
+  console.log(req.body)
   if (
     [street, city, state, postalCode, phone].some(
-      (field) => field?.trim() === ""
+      field => !field || (typeof field === 'string' && field.trim() === "")
     )
   ) {
     throw new ApiError(401, "All fields are required");

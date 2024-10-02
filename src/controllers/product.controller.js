@@ -1,27 +1,67 @@
+import mongoose from "mongoose";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Product } from "../models/product.model.js";
 import { isValidObjectId } from "mongoose";
+import { uploadOnCloudinary } from "../utils/cloudinary.js"
+import {Category} from '../models/category.model.js'
 
 const createProduct = asyncHandler(async (req, res) => {
-  const { name, description, productImg, price, stock, category, owner } =
-    req.body;
+  const { name, description, price, category } = req.body;
+  
+  console.log(req.body);
+  console.log(req.files); 
 
-  if (!name || !description || !category || !productImg || !price) {
+  const categoryDocument = await Category.findOne({ name: category });
+  if (!categoryDocument) {
+    throw new ApiError(400, "Category not found");
+  }
+
+
+  if (!name || !description || !price) {
     throw new ApiError(
       400,
       "Name, description, productImg, price and category are required"
     );
   }
 
+  // const avatarLocalPath = req.files?.avatar[0]?.path;
+
+  let productImgLocalFilePath = req.files?.productImg[0]?.path;
+  
+  console.log(productImgLocalFilePath)
+
+  // Check if the file is uploaded and extract the path
+  // if (req.files && Array.isArray(req.files.productImg) && req.files.productImg.length > 0) {
+  //   productImgLocalFilePath = req.files.productImg[0].path;
+  //   console.log(productImgLocalFilePath)
+  // } else {
+  //   throw new ApiError(400, "Product image is required");
+  // }
+
+  // Upload image to Cloudinary
+  let productImgPath = null;
+  try {
+    productImgPath = await uploadOnCloudinary(productImgLocalFilePath);
+    console.log(productImgPath);
+  } catch (error) {
+    console.error("Cloudinary upload failed:", error);
+    throw new ApiError(500, "Image upload failed. Please try again.");
+  }
+
+  // Ensure the image upload returned a secure URL
+  if (!productImgPath || !productImgPath.secure_url) {
+    throw new ApiError(500, "Image upload failed. Please try again.");
+  }
+
+  // Create a new product
   const newProduct = await Product.create({
     name,
     description,
-    productImg,
+    productImg: productImgPath.secure_url, // Ensure this is valid
     price,
-    stock,
-    category,
+    category: categoryDocument._id,
     owner: req.user?._id,
   });
 

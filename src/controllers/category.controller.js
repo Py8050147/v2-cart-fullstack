@@ -11,14 +11,14 @@ import { isValidObjectId } from "mongoose";
 //deleteCategory
 
 const createCategory = asyncHandler(async (req, res) => {
-  const { name, description } = req.body;
-  if (!name || !description) {
-    throw new ApiError(401, "please provide a valid name and description");
+  const { name } = req.body;
+  if (!name) {
+    throw new ApiError(401, "please provide a valid name");
   }
 
   const category = await Category.create({
     name,
-    description,
+    // description,
   });
 
   return res

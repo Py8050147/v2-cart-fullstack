@@ -9,12 +9,8 @@ router.use(verifyJwt)
 
 router.route('/').get(getAllProduct)
     .post(
-        upload.fields([
-            {
-                name: "prdouctImage",
-                maxCount: 1,
-            }
-        ]),
+    upload.fields([{name: "productImg", maxCount: 1}]),
+        // upload.single("productImg"),
         createProduct
 )
     
