@@ -4,14 +4,14 @@ import jwt from "jsonwebtoken";
 
 const userSchema = new Schema(
   {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-      index: true
-    },
+    // username: {
+    //   type: String,
+    //   required: true,
+    //   unique: true,
+    //   lowercase: true,
+    //   trim: true,
+    //   index: true
+    // },
     fullname: {
       type: String,
       required: true,
@@ -40,7 +40,8 @@ const userSchema = new Schema(
       type: String,
     },
     // address: {
-    //   type: String,
+    //   type: Schema.Types.ObjectId,
+    //   ref: "Address",
     //   required: true
     // },
     // phone: {

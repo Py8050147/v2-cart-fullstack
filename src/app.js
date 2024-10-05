@@ -10,7 +10,8 @@ const app = express()
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true,
-    allowedHeaders: true
+    allowedHeaders: true,
+    // methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }))
 
 app.use(express.json({limit: 3e7}))
@@ -26,7 +27,7 @@ import categoryRouter from './routes/category.routes.js'
 import addressRouter from './routes/address.routes.js'
 
 
-app.use("/api/v2/user", userRouter)
+app.use("/api/v2/users", userRouter)
 app.use("/api/v2/products", productRouter)
 app.use("/api/v2/orders", orderRouter)
 app.use("/api/v2/categorys", categoryRouter)

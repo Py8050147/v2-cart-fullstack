@@ -33,18 +33,18 @@ const registersUser = asyncHandler(async (req, res) => {
   // check for user creation
   // return res
     
-  const { username, fullname, email, password, role } = req.body
-  console.log(fullname, username, email, password, role)
+  const { fullname, email, password, role } = req.body
+  console.log(fullname, email, password, role)
   console.log(req.body)
   
   if (
-    [fullname, username, email, password,].some((field) => field?.trim() === "")
+    [fullname, email, password,].some((field) => field?.trim() === "")
   ) {
     throw new ApiError(400, "All field are required")
   }
 
   const exitedUser = await User.findOne({
-    $or: [{ username }, { email }]
+    $or: [{ fullname }, { email }]
   })
 
   if (exitedUser) {
@@ -53,7 +53,7 @@ const registersUser = asyncHandler(async (req, res) => {
 
 
   const user = await User.create({
-    username: username.toLowerCase(),
+    // username: username.toLowerCase(),
     email,
     password ,
     fullname,
@@ -89,20 +89,22 @@ const registersUser = asyncHandler(async (req, res) => {
   // }
 })
 const loginedUser = asyncHandler(async (req, res) => {
+  console.log(req.body)
   // req.body => data -compleate
   // username or email -compleate
   // find the user
   //password cheack
   // accesstoken and refreshtoken
 
-  const { username, email, password } = req.body
+  const { email, password } = req.body
+  console.log(req.body)
 
-  if (!username && !email) {
-    throw new ApiError(400, 'username and email is required')
+  if (!email) {
+    throw new ApiError(400, 'email is required')
   }
 
  const user =  await User.findOne({
-    $or: [{username}, {email}]
+    $or:  {email}
  })
   
   if (!user) {
@@ -218,6 +220,7 @@ const generateNewRefreshToken = asyncHandler(async (req, res) => {
 
 const changeCurrentUser = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body
+  console.log(req.body)
   
   const user = await User.findById(req.user?._id)
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
@@ -241,9 +244,9 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 })
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullname, email, phone, address } = req.body
+  const { fullname, email } = req.body
   
-  if (!fullname || !email || !phone || !address) {
+  if (!fullname || !email) {
     throw new ApiError(400, 'All fields are required')
   }
 
@@ -253,12 +256,12 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
       $set: {
         fullname,
         email,
-        phone,
-        address
+        // address: address._id
       }
     },
     {
-      new: true
+      new: true,
+      runValidators: true
     }
   )
 
