@@ -164,7 +164,7 @@ export {
     createProduct,
     getAllProduct,
     getProduct,
-  upadateProduct,
+   upadateProduct,
     deleteProduct
 };
     

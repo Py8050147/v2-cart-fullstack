@@ -23,71 +23,51 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 
 const registersUser = asyncHandler(async (req, res) => {
-  //get user details from frontend
-  //validation -not empty
-  //check if user already exists : username email
-  //check for images, check for avatar
-  //upload then to clodinary, avatar
-  //create a user object - create entery in db
-  //remove password and refresh token field from response
-  // check for user creation
-  // return res
-    
-  const { fullname, email, password, role } = req.body
-  console.log(fullname, email, password, role)
-  console.log(req.body)
-  
+  const { fullname, email, password, username, role } = req.body;
+
+  console.log(fullname, email, password, username, role);
+  console.log(req.body);
+
+  // Check if any required fields are missing
   if (
-    [fullname, email, password,].some((field) => field?.trim() === "")
+    [fullname, email, password, username].some((field) => field?.trim() === "")
   ) {
-    throw new ApiError(400, "All field are required")
+    throw new ApiError(400, "All fields are required");
   }
 
-  const exitedUser = await User.findOne({
-    $or: [{ fullname }, { email }]
-  })
+  // Check if user already exists with the same email or username
+  const existingUser = await User.findOne({
+    $or: [{ email }, { username }],
+  });
 
-  if (exitedUser) {
-    throw new ApiError(409, 'user with username and email exite')
+  if (existingUser) {
+    throw new ApiError(409, "User with this username or email already exists");
   }
 
-
+  // Create new user
   const user = await User.create({
-    // username: username.toLowerCase(),
+    username: username.toLowerCase(),
     email,
-    password ,
+    password,
     fullname,
-    role: role || 'USER'
-  })
-  // const user = new User({
-  //   username,
-  //   email,
-  //   password,
-  //   fullname
-  // });
+    role: role || "USER",
+  });
 
-  
-  // try {
-    // await user.save()
-    const createUser = await User.findById(user._id)
-      .select("-password -refreshToken")
-      .lean();
-    
-    if (!createUser) {
-      throw new ApiError(500, "something went wrong while registering the user")
-    }
-  
-    return res
-      .status(201)
-      .json(new ApiResponse(200, createUser, "User registered Successfully"))
-  
-  // } catch (error) {
-  //   if (error.name === 'ValidationError') {
-  //     throw new ApiError(400, 'User validation failed: ' + error.message);
-  //   }
-  //   throw error;
-  // }
-})
+  // Fetch the created user excluding sensitive fields like password
+  const createdUser = await User.findById(user._id)
+    .select("-password -refreshToken")
+    .lean();
+
+  if (!createdUser) {
+    throw new ApiError(500, "Something went wrong while registering the user");
+  }
+
+  // Respond with success
+  return res
+    .status(201)
+    .json(new ApiResponse(200, createdUser, "User registered successfully"));
+});
+
 const loginedUser = asyncHandler(async (req, res) => {
   console.log(req.body)
   // req.body => data -compleate
