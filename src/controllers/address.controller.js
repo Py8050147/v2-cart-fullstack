@@ -6,6 +6,7 @@ import { Address } from "../models/address.model.js";
 // createAddress
 const createAddress = asyncHandler(async (req, res) => {
   const { street, city, state, postalCode, phone } = req.body;
+  console.log(req.body)
 
   // Ensure all fields are provided and not empty
   if (
@@ -32,9 +33,22 @@ const createAddress = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, address, "Address created successfully"));
 });
 
-// getAddress
 const getAddress = asyncHandler(async (req, res) => {
+  const addresses = await Address.find({ user: req.user._id }).lean();
+
+  if (addresses.length === 0) {
+    throw new ApiError(404, "No addresses found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, addresses, "Addresses successfully fetched"));
+});
+
+// getAddress
+const getAddressId = asyncHandler(async (req, res) => {
   const { addressId } = req.params;
+  console.log(req.params)
 
   // Ensure address ID is provided
   if (!addressId) {
@@ -120,6 +134,7 @@ const deleteAddress = asyncHandler(async (req, res) => {
 export {
   createAddress,
   getAddress,
+  getAddressId,
   updateAddress,
   deleteAddress
 };

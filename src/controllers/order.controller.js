@@ -10,6 +10,7 @@ import mongoose from "mongoose";
 // Create Order with Address and Customer Validation
 const createOrder = asyncHandler(async (req, res) => {
   const { orderPrice, orderItems, address, status, customer } = req.body;
+  console.log(req.body)
 
   // Validate required fields
   if (!orderPrice || !orderItems || !address || !customer) {
