@@ -6,15 +6,16 @@ import { Product } from '../models/product.model.js';
 import { Address } from "../models/address.model.js";
 import { User } from '../models/user.model.js'; // Import User model
 import mongoose from "mongoose";
+import stripe from "../config/stripe.js";
 
 // Create Order with Address and Customer Validation
 const createOrder = asyncHandler(async (req, res) => {
-  const { orderPrice, orderItems, address, status, customer } = req.body;
+  const { orderPrice, orderItems, address, customer, paymentMethodId } = req.body;
   console.log(req.body)
-
+  
   // Validate required fields
-  if (!orderPrice || !orderItems || !address || !customer) {
-    throw new ApiError(400, "All fields (orderPrice, orderItems, address, and customer) are required.");
+  if (!orderPrice || !orderItems || !address || !customer || !paymentMethodId) {
+    throw new ApiError(400, "All fields (orderPrice, orderItems, address, customer, and paymentMethodId) are required.");
   }
 
   // Validate if the user (customer) exists
@@ -38,24 +39,40 @@ const createOrder = asyncHandler(async (req, res) => {
       }
       return {
         productId: product._id,
-        quantity: item.quantity || 1, // Default to quantity of 1 if not provided
+        quantity: item.quantity || 1,
       };
     })
   );
 
-  // Create the order with the validated order items and address
-  const order = await Order.create({
-    orderPrice,
-    orderItems: orderItemsWithValidProducts,
-    customer: customer,         // Store the customer ID in the order
-    address: addressExists._id,  // Store the valid address ID in the order
-    status                       // Optional status if provided
-  });
+  // Process payment with Stripe
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(orderPrice * 100),
+      currency: 'usd',
+      payment_method: paymentMethodId,
+      confirm: true,
+      description: `Order for user ${customer}`,
+      metadata: { orderItems: JSON.stringify(orderItemsWithValidProducts) },
+      return_url: 'http://localhost:5173/thank-you', // Add your return URL here
+    });
 
-  return res
-    .status(201)
-    .json(new ApiResponse(201, order, "Order created successfully"));
+    const order = await Order.create({
+      orderPrice,
+      orderItems: orderItemsWithValidProducts,
+      customer: customer,
+      address: addressExists._id,
+      paymentIntentId: paymentIntent.id,
+      paymentStatus: paymentIntent.status,
+    });
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, order, "Order created successfully"));
+  } catch (error) {
+    throw new ApiError(400, `Payment failed: ${error.message}`);
+  }
 });
+
 
 // Get all orders
 const getOrders = asyncHandler(async (req, res) => {

@@ -32,6 +32,10 @@ const orderSchema = new Schema(
       enum: ["PENDING", "CANCELLED", "DELIVERED"],
       default: "PENDING",
     },
+    paymentIntentId: {
+			type: String,
+			unique: true,
+		},
   },
   { timestamps: true }
 );
